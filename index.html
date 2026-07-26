@@ -12,6 +12,18 @@
     .bars>div>span:last-child{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;background:#e9eef3;border-radius:9px;padding-right:6px;overflow:hidden}
     .bars i{height:18px;border-radius:9px}
     .bars b{color:var(--a);font-size:11px;white-space:nowrap}
+    .pie-layout{display:grid;place-items:center;gap:22px;padding:14px 0}
+    .pie-chart{width:min(250px,76vw);aspect-ratio:1;border-radius:50%;position:relative;box-shadow:0 14px 35px #062b5525;transition:.3s}
+    .pie-chart:after{content:"";position:absolute;inset:25%;border-radius:50%;background:#fff}
+    .pie-center{position:absolute;inset:31%;z-index:1;display:grid;place-content:center;text-align:center;color:var(--a)}
+    .pie-center small{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--g)}
+    .pie-center b{font-size:14px;margin-top:3px}
+    .pie-legend{width:100%;display:grid;gap:10px}
+    .pie-legend>div{display:grid;grid-template-columns:11px minmax(0,1fr) auto;gap:8px;align-items:start;font-size:11px}
+    .pie-legend i{width:11px;height:11px;border-radius:3px;margin-top:2px}
+    .pie-legend span{color:#33485a;line-height:1.35}
+    .pie-legend b{text-align:right;color:var(--a);white-space:nowrap}
+    .pie-legend small{display:block;color:var(--g);font-weight:500}
   </style>
 </head>
 <body>
@@ -61,12 +73,35 @@ function chartRows(key,label,value,top,rows){
   return`<div class="bars">${items.map(([name,amount])=>`<div><span title="${name}">${name}</span><span><i style="width:${Math.max(4,amount/max*100)}%"></i><b>${moneyHNL(amount)}</b></span></div>`).join("")}</div>`
 }
 function barChart(key,label,value,top,titleText){return`<div class="panel"><h3>${titleText}</h3><div id="chart-${key}">${chartRows(key,label,value,top)}</div></div>`}
+function pieChartRows(rows){
+  const source=rows||D.egresos?.rows||[],grouped={};
+  source.forEach(row=>{
+    const name=String(row["PAGADO A"]||"Sin identificar").trim()||"Sin identificar";
+    grouped[name]=(grouped[name]||0)+numberValue(row["MONTO"]);
+  });
+  const items=Object.entries(grouped).filter(([,amount])=>amount>0).sort((a,b)=>b[1]-a[1]);
+  const total=items.reduce((sum,[,amount])=>sum+amount,0);
+  if(!items.length||total<=0)return`<div class="empty">No hay montos disponibles para el gráfico.</div>`;
+  const colors=["#062b55","#c62232","#f2bd23","#0a477f","#667482","#111820","#8f1825","#b58a0d"];
+  let accumulated=0;
+  const segments=items.map(([,amount],index)=>{
+    const start=accumulated;
+    accumulated+=amount/total*100;
+    return`${colors[index%colors.length]} ${start.toFixed(2)}% ${accumulated.toFixed(2)}%`;
+  }).join(",");
+  const legend=items.map(([name,amount],index)=>{
+    const percent=amount/total*100;
+    return`<div><i style="background:${colors[index%colors.length]}"></i><span title="${name}">${name}</span><b>${percent.toFixed(1)}%<small>${moneyHNL(amount)}</small></b></div>`;
+  }).join("");
+  return`<div class="pie-layout"><div class="pie-chart" style="background:conic-gradient(${segments})" role="img" aria-label="Distribución porcentual de gastos por pagado a"><div class="pie-center"><small>Total</small><b>${moneyHNL(total)}</b></div></div><div class="pie-legend">${legend}</div></div>`;
+}
+function pieChart(){return`<div class="panel"><h3>Distribución de gastos por PAGADO A</h3><div id="chart-egresos">${pieChartRows()}</div></div>`}
 function screens(){return`
 <section id="inicio" class="screen active"><div class="hero"><div><span class="tag">Informe Financiero · Liga Bancaria de Veteranos</span><h1>Portal Financiero: Equipo Veteranos de Fútbol SEFIN</h1><p>Temporada 2026</p></div><img src="imagenes/LogoEquipoFutbolVeteranos-SEFIN.jpeg" alt="Escudo"></div><h2 class="section-title">Transparencia que fortalece al equipo</h2><p class="lead">Bienvenido al portal de transparencia del equipo de fútbol de veteranos de la Secretaría de Finanzas. Este espacio fue diseñado para ofrecer información financiera clara, accesible y confiable a todos nuestros jugadores, aficionados y colaboradores.</p><p class="lead">A través de los ocho apartados del menú, podrá consultar el detalle de los ingresos (aportaciones y actividades comerciales), los egresos, el resumen del flujo de caja y el libro mayor de cuentas por pagar, junto con las evidencias de cotizaciones, actividades y comprobantes de cada gasto realizado desde la caja del equipo. Además, encontrará un breve resumen de la situación financiera con la que recibimos la temporada.</p><div class="cards"><article class="card"><h3>Transparencia y Rendición de Cuentas</h3><p>Claridad total en el manejo de nuestros recursos.</p></article><article class="card"><h3>Evidencia e Integridad Financiera</h3><p>Respaldo documental en cada transacción.</p></article><article class="card"><h3>Trazabilidad e Historial Financiero</h3><p>Perspectiva clara desde el inicio hasta el presente.</p></article></div><div class="benefits">${["Visión financiera","Control y confianza","Evidencia centralizada","Seguimiento histórico","Acceso para interesados","Consulta ágil"].map(x=>`<article class="card">${x}</article>`).join("")}</div><div class="map"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10944.614954543182!2d-87.21797586111956!3d14.106330104219849!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f6fa2be76e0b0e5%3A0x7a6ebe52cb053ca7!2sSecretaria%20de%20Finanzas!5e0!3m2!1ses-419!2shn!4v1783382747776!5m2!1ses-419!2shn" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div><h2 class="section-title">Preguntas Frecuentes</h2>${["¿Qué información contiene el portal?","¿De dónde provienen los datos?","¿Cómo se consultan las aportaciones?","¿Dónde se visualizan los comprobantes?","¿Qué representa el flujo de caja?","¿Cómo solicitar una aclaración?"].map(q=>`<details><summary>${q}</summary><p>Consulte las vistas financieras del menú o contacte a la Tesorería mediante WhatsApp para una aclaración.</p></details>`).join("")}</section>
 <section id="historia" class="screen">${title("Nuestra historia","Un equipo rescatado con liderazgo y compromiso")}${story}<div class="gallery">${img("SaldoInicialCaja.jpeg","Lista de los aportantes del saldo inicial de caja")}${img("539.jpeg","Recibo en el cual la liga evidencia el saldo de la deuda")}</div></section>
 <section id="aportaciones" class="screen">${title("Ingresos","Ingreso por Aportaciones","Aportes de jugadores, colaboradores y afición.")}<div class="split">${table("aportaciones","APORTANTE","CANTIDAD")}${barChart("aportaciones","APORTANTE","CANTIDAD",6,"Top 6 de aportantes")}</div></section>
-<section id="actividades" class="screen">${title("Ingresos","Ingreso por Actividades Comerciales","Rifa móvil smartphone Samsumg Galaxy A26, rifarse con el número de la diaria del 25 de marzo del 2026 a las 9 pm.")}<div class="split">${table("actividades","PARTICIPANTE","CANTIDAD")}${barChart("actividades","PARTICIPANTE","CANTIDAD",3,"Top 3 de participantes")}</div></section>
-<section id="egresos" class="screen">${title("Egresos","Compromisos y operación del equipo")}<div class="split">${table("egresos","PAGADO A","MONTO")}<div class="panel"><h3>Distribución de gastos</h3><div class="empty">N/D — pendiente de conexión</div></div></div></section>
+<section id="actividades" class="screen">${title("Ingresos","Ingreso por Actividades","Aportes por actividades comerciales.")}<div class="split">${table("actividades","PARTICIPANTE","CANTIDAD")}${barChart("actividades","PARTICIPANTE","CANTIDAD",3,"Top 3 de participantes")}</div></section>
+<section id="egresos" class="screen">${title("Egresos","Compromisos y operación del equipo")}<div class="split">${table("egresos","PAGADO A","MONTO")}${pieChart()}</div></section>
 <section id="flujo" class="screen">${title("Posición financiera","Resumen Flujo de Caja y Cuentas por Pagar")}<div class="insights"><article><b>L 0.81</b><p>Por cada Lempira recaudado se destinó L 0.81 a la deuda de la temporada 2025 y la admisión de la temporada 2026.</p></article><article><b>L 0.19</b><p>Por cada Lempira recaudado se utilizó L 0.19 para la operación del equipo en la temporada.</p></article><article><b>100%</b><p>La distribución informada asigna la totalidad de cada Lempira recaudado entre saneamiento y admisión (81%) y operación (19%).</p></article></div><h2>Flujo de Caja</h2>${table("flujo")}<h2>Cuentas por Pagar</h2>${table("cxp")}<div class="gallery">${img("000-001-01-00000188.jpeg","Factura emitida por la liga en razón de la admisión a la temporada 2026")}</div></section>
 <section id="cotizaciones" class="screen">${title("Respaldo comercial","Resumen Cotizaciones")}<div class="gallery">${img("COTIZACION-1.jpeg","Importadora Ezequiel")}${img("COTIZACION-2.jpeg","Guate Sport")}${img("COTIZACION-3.jpeg","Guate Sport")}</div></section>
 <section id="evidencias" class="screen">${title("Trazabilidad documental","EVIDENCIA DE ACTIVIDADES")}<div class="gallery">${evidence.map(x=>img(...x)).join("")}</div></section>`}
@@ -83,8 +118,11 @@ function filterRows(el,key){
   if(totalElement)totalElement.textContent=moneyHNL(totalRows(filtered,totalColumn));
   const chart=document.getElementById(`chart-${key}`);
   if(chart){
-    const top=key==="aportaciones"?6:3;
-    chart.innerHTML=chartRows(key,filterColumn,"CANTIDAD",top,filtered);
+    if(key==="egresos")chart.innerHTML=pieChartRows(filtered);
+    else{
+      const top=key==="aportaciones"?6:3;
+      chart.innerHTML=chartRows(key,filterColumn,"CANTIDAD",top,filtered);
+    }
   }
 }
 window.filterRows=filterRows;
