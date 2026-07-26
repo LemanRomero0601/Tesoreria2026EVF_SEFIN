@@ -44,7 +44,7 @@
 <aside class="chat" id="chat"><div class="chat-head"><b>Asistente IA</b><span><button id="clear">Limpiar</button> <button id="min">—</button></span></div><div class="msgs" id="msgs"></div><form class="chat-form" id="chatForm"><input id="q" placeholder="Escribe tu pregunta…"><button>Enviar</button></form></aside>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Visor de imagen"><button class="modal-close" type="button" onclick="closeModal()" aria-label="Cerrar imagen">×</button><figure onclick="event.stopPropagation()"><img id="modalImg" alt=""><p id="modalText"></p></figure></div>
 <script>
-const WEB_APP_URL="PEGAR_AQUI_URL_DEL_APPS_SCRIPT";
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwnygznP0p14DjbkOO45NkWbQhIQSS5rQDGcEIZQ57gHpSp3WE_3Ou1rxz6RMP0j7C5/exec";
 const P=[["inicio","Inicio"],["historia","Historia"],["aportaciones","Ingreso por Aportaciones"],["actividades","Ingreso por Actividades"],["egresos","Egresos"],["flujo","Resumen Flujo de Caja y Cuentas por Pagar"],["cotizaciones","Cotizaciones"],["evidencias","Evidencia de Actividades"]];
 const D={}; const img=(s,t)=>`<article onclick="openImg('imagenes/${s}',${JSON.stringify(t)})"><img loading="lazy" src="imagenes/${s}" alt="${t}"><h3>${t}</h3></article>`;
 const title=(k,t,s="")=>`<div class="title"><span class="tag">${k}</span><h1>${t}</h1><p>${s}</p></div>`;
