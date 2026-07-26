@@ -32,6 +32,11 @@
     .modal p{margin:10px 52px 0;line-height:1.35}
     .modal-close{position:fixed;top:16px;right:20px;z-index:2;width:46px;height:46px;border:2px solid var(--y);border-radius:50%;background:var(--a);color:#fff;font-size:28px;line-height:1;box-shadow:0 8px 24px #0007}
     .modal-close:hover{background:var(--r);transform:scale(1.06)}
+    .gallery article{display:flex;flex-direction:column;background:#fff}
+    .gallery img{display:block;width:100%;height:clamp(300px,38vw,470px);object-fit:contain;object-position:center;background:#f7f9fb;padding:10px;border-bottom:1px solid #e0e7ed}
+    .gallery h3{margin:0;padding:16px 18px 18px;min-height:68px}
+    .gallery article:hover img{transform:scale(1.01)}
+    @media(max-width:700px){.gallery img{height:min(72vh,520px);padding:8px}}
   </style>
 </head>
 <body>
@@ -44,7 +49,7 @@
 <aside class="chat" id="chat"><div class="chat-head"><b>Asistente IA</b><span><button id="clear">Limpiar</button> <button id="min">—</button></span></div><div class="msgs" id="msgs"></div><form class="chat-form" id="chatForm"><input id="q" placeholder="Escribe tu pregunta…"><button>Enviar</button></form></aside>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Visor de imagen"><button class="modal-close" type="button" onclick="closeModal()" aria-label="Cerrar imagen">×</button><figure onclick="event.stopPropagation()"><img id="modalImg" alt=""><p id="modalText"></p></figure></div>
 <script>
-const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwnygznP0p14DjbkOO45NkWbQhIQSS5rQDGcEIZQ57gHpSp3WE_3Ou1rxz6RMP0j7C5/exec";
+const WEB_APP_URL="PEGAR_AQUI_URL_DEL_APPS_SCRIPT";
 const P=[["inicio","Inicio"],["historia","Historia"],["aportaciones","Ingreso por Aportaciones"],["actividades","Ingreso por Actividades"],["egresos","Egresos"],["flujo","Resumen Flujo de Caja y Cuentas por Pagar"],["cotizaciones","Cotizaciones"],["evidencias","Evidencia de Actividades"]];
 const D={}; const img=(s,t)=>`<article onclick="openImg('imagenes/${s}',${JSON.stringify(t)})"><img loading="lazy" src="imagenes/${s}" alt="${t}"><h3>${t}</h3></article>`;
 const title=(k,t,s="")=>`<div class="title"><span class="tag">${k}</span><h1>${t}</h1><p>${s}</p></div>`;
